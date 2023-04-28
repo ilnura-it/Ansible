@@ -1,0 +1,37 @@
+---
+
+- name: Check httpd status
+  hosts: webservers
+  tasks:
+    - name: Check if apache2 is running
+      systemd:
+        name: apache2
+        state: started
+      register: apache2_status
+
+    - name: Display apache2 status
+      debug:
+        var: apache2_status
+
+- name: Check and start Apache2
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Check if Apache2 is installed
+      stat:
+        path: /usr/sbin/apache2
+      register: apache_installed
+
+    - name: Check if Apache2 is running
+      systemd:
+        name: apache2
+        state: started
+      register: apache_running
+      ignore_errors: true
+
+    - name: Start Apache2 if not running
+      systemd:
+        name: apache2
+        state: started
+      when: apache_installed.stat.exists and not apache_running.changed

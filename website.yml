@@ -1,0 +1,68 @@
+- name: Install and configure Apache web server
+  hosts: all
+  become: true
+  vars:
+    src_dir: "/tmp/restoran/bootstrap-restaurant-template"
+
+  tasks:
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Check if Apache2 is running
+      systemd:
+        name: apache2
+        state: started
+      register: apache_running
+      ignore_errors: true
+
+    - name: Start Apache2 if not running
+      systemd:
+        name: apache2
+        state: started
+      when: apache_running is failed
+
+    - name: Enable Apache2
+      systemd:
+        name: apache2
+        enabled: yes
+
+    - name: Install Unzip
+      apt:
+        name: unzip
+        state: present
+
+    - name: Download Webpage template
+      get_url:
+        url: https://www.free-css.com/assets/files/free-css-templates/download/page290/restoran.zip
+        dest: /tmp/restoran.zip
+
+    - name: Create destination directory
+      file:
+        path: /tmp/restoran
+        state: directory
+
+    - name: Extract archive
+      unarchive:
+        src: /tmp/restoran.zip
+        dest: /tmp/restoran/
+        remote_src: true
+
+    - name: Check if source directory exists
+      stat:
+        path: /tmp/restoran/bootstrap-restaurant-template
+      register: src_dir
+
+    - name: Check if source directory exists
+      stat:
+        path: "{{ src_dir }}"
+      register: src_dir
+
+    - name: Move files to web directory
+      command: "sudo mv /tmp/restoran/bootstrap-restaurant-template/* /var/www/html/"
+      when: src_dir.stat.exists
+
+    - name: Display result
+      debug:
+        var: result

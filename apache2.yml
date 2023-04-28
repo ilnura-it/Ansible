@@ -13,7 +13,7 @@
       debug:
         var: apache2_status
 
-- name: Check aand start Apache2
+- name: Check and start Apache2
   hosts: webservers
   become: true
 

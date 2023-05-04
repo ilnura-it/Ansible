@@ -1,9 +1,7 @@
 - name: Install and configure Apache web server
   hosts: all
   become: true
-  vars:
-    src_dir: "/tmp/restoran/bootstrap-restaurant-template"
-
+  
   tasks:
     - name: Install Apache2
       apt:
@@ -40,13 +38,13 @@
 
     - name: Create destination directory
       file:
-        path: /tmp/restoran
+        path: /tmp/restoran/html
         state: directory
 
     - name: Extract archive
       unarchive:
         src: /tmp/restoran.zip
-        dest: /tmp/restoran/
+        dest: /tmp/restoran/html
         remote_src: true
 
     - name: Check if source directory exists
@@ -55,8 +53,13 @@
       register: src_dir
 
     - name: Move files to web directory
-      command: "sudo mv /tmp/restoran/bootstrap-restaurant-template/* /var/www/html/"
+      command: "sudo mv /tmp/restoran/html/bootstrap-restaurant-template/* /var/www/html/"
       when: src_dir.stat.exists
+
+    - name: Copy files to web directory
+      copy: 
+        src: /tmp/restoran/html/
+        dest: /var/www/html/
 
     - name: Display result
       debug:

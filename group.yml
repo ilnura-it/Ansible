@@ -1,0 +1,28 @@
+---
+- name: Install devops group and remove developers group
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Ensure group "devops" exists
+      ansible.builtin.group:
+        name: devops
+        state: present
+
+    - name: Remove group "developers"
+      ansible.builtin.group:
+        name: developers
+        state: absent
+
+    - name: Create a user '_new_user' exists
+      ansible.builtin.user:
+        name: "new_user"
+        state: present
+        system: false
+        password: 'nk98h%gf$j'
+
+    - name: Add new_user to group devops
+      ansible.builtin.user:
+        name: "new_user"
+        group: devops
+        append: true
